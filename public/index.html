@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gulliver Chat | Premium Messaging</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="./css/all.min.css" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a" />
+  
+  <style>
+    /* Налаштування дизайну Gulliver Chat */
+    :root {
+      --bg-dark: #0f172a;
+      --panel-dark: rgba(15, 23, 42, 0.75); /* Напівпрозорий фон для ефекту скла */
+      --accent: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      --text-main: #f8fafc;
+    }
+
+    body {
+      /* ВСТАВКА ФОНОВОЇ КАРТИНКИ */
+      background: url('bg.jpg') no-repeat center center fixed !important;
+      background-size: cover !important;
+      
+      color: var(--text-main) !important;
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden; /* Щоб сторінка не смикалася */
+    }
+
+    nav {
+      background: rgba(15, 23, 42, 0.6) !important;
+      backdrop-filter: blur(15px); /* Розмиття фону під панеллю */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      height: 60px;
+      position: relative;
+      z-index: 10;
+    }
+
+    nav h3 {
+      margin: 0;
+      background: var(--accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    #overlay {
+      background: rgba(0, 0, 0, 0.4) !important; /* Легке затемнення поверх картинки */
+      backdrop-filter: blur(5px);
+    }
+
+    #usernamePrompt, #settingsPrompt, #youtubePopup {
+      background: var(--panel-dark) !important;
+      backdrop-filter: blur(20px); /* Ефект матового скла */
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 24px !important;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+      color: white !important;
+    }
+
+    #joinChat, #updateSettings {
+      background: var(--accent) !important;
+      border: none !important;
+      border-radius: 12px !important;
+      font-weight: 700 !important;
+      color: white !important;
+      padding: 12px !important;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #joinChat:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.4);
+    }
+
+    /* Блок розробників */
+    .dev-footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .dev-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #94a3b8;
+      margin-bottom: 10px;
+    }
+
+    .dev-names {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    /* Чат і повідомлення */
+    #content {
+      background: transparent !important;
+    }
+
+    #messagesContainer {
+      background: rgba(15, 23, 42, 0.4) !important;
+      backdrop-filter: blur(10px);
+    }
+
+    #messages li {
+      border-radius: 15px !important;
+      background: rgba(51, 65, 85, 0.8) !important;
+      backdrop-filter: blur(5px);
+      color: white !important;
+      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    #chatForm {
+       background: rgba(30, 41, 59, 0.8) !important;
+       backdrop-filter: blur(10px);
+    }
+  </style>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./js/dom.js"></script>
+  <script src="./js/messenger.js" defer></script>
+</head>
+
+<body>
+  <nav>
+    <h3><i class="fa-solid fa-crown" style="color: #38bdf8; margin-right: 10px;"></i>GULLIVER CHAT</h3>
+    <div class="buttons-container">
+      <span id="pwa-btn-container"></span>
+      <button id="settingsButton" style="background: transparent; color: white; border: none; cursor: pointer;">
+        <i class="fa-solid fa-gears fa-lg"></i>
+      </button>
+    </div>
+  </nav>
+
+  <div id="overlay">
+    <div id="usernamePrompt">
+      <div class="header" style="text-align: center;">
+        <div class="title" style="font-size: 1.8rem;">
+          WELCOME
+          <span style="font-size:0.9rem; display:block; color: #38bdf8; margin-top: 5px; font-weight: 400;">Gulliver Communication System</span>
+        </div>
+      </div>
+      
+      <div class="input-container" style="margin-top: 20px;">
+        <input type="text" id="username" placeholder="Enter Username..." required style="background: rgba(15, 23, 42, 0.6); color: white; border: 1px solid #334155; padding: 12px; border-radius: 10px; width: 85%;" />
+        <input type="color" id="colorPicker" value="#38bdf8" style="height: 45px; width: 45px; border: none; background: transparent; cursor: pointer;" />
+      </div>
+      
+      <button id="joinChat" style="width: 100%; margin-top: 20px;">ACCESS SYSTEM</button>
+
+      <div class="dev-footer">
+        <div class="dev-label">Core Developers</div>
+        <div class="dev-names">
+          <span>Ю. Андреєв</span>
+          <span>•</span>
+          <span>Ю. Іванчишин</span>
+          <span>•</span>
+          <span>Т. Савчук</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsOverlay">
+    <div id="settingsPrompt">
+      <div class="header">
+        <div class="title">User Settings</div>
+        <div class="close-button">
+          <button id="closeSettings"><i class="fa-solid fa-circle-xmark"></i></button>
+        </div>
+      </div>
+      <div class="input-container">
+        <input type="text" id="newUsername" placeholder="Change alias" />
+        <input type="color" id="newColorPicker" value="#38bdf8" />
+      </div>
+      <button id="updateSettings">UPDATE</button>
+    </div>
+  </div>
+
+  <div id="ytOverlay">
+    <div id="youtubePopup">
+      <div class="header">
+        <div class="title"><i class="fa-brands fa-youtube" style="color:#ef4444;"></i> Media Share</div>
+        <div class="close-button">
+          <button id="closeYouTube"><i class="fa-solid fa-circle-xmark"></i></button>
+        </div>
+      </div>
+      <div class="search-fields">
+        <input type="text" id="youtubeSearchInput" placeholder="Search..." />
+        <button id="searchYouTube"><i class="fa-solid fa-magnifying-glass"></i></button>
+      </div>
+      <ul id="searchResults"></ul>
+    </div>
+  </div>
+
+  <div id="content">
+    <div id="messagesContainer">
+      <ul id="messages"></ul>
+    </div>
+    <div id="tools">
+      <div id="typingArea" style="color: #94a3b8; font-size: 0.8rem; padding: 5px 15px;"></div>
+      <div class="bar-btn-group">
+        <button id="openYouTube" class="bar-btn"><i class="fa-brands fa-youtube"></i></button>
+        <button id="selectImageButton" class="bar-btn"><i class="fa-regular fa-images"></i></button>
+      </div>
+    </div>
+
+    <form id="chatForm" class="flex-container">
+      <input id="inputMessage" autocomplete="off" placeholder="Write to the team..." />
+      <input type="file" id="imageInput" accept="image/*" style="display: none" />
+      <button class="send-btn"><i class="fa-regular fa-paper-plane fa-2x"></i></button>
+    </form>
+  </div>
+
+  <script>
+    const selectImageButton = document.getElementById('selectImageButton');
+    const imageInput = document.getElementById('imageInput');
+    selectImageButton.addEventListener('click', () => { imageInput.click(); });
+
+    if (typeof navigator.serviceWorker !== 'undefined') {
+      navigator.serviceWorker.register('sw.js')
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      if (!localStorage.getItem('pwaInstalled')) {
+        const installButton = document.createElement('button');
+        installButton.textContent = 'Install App';
+        installButton.style = "background: #38bdf8; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 10px;";
+        installButton.addEventListener('click', () => {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              installButton.style.display = 'none';
+              localStorage.setItem('pwaInstalled', 'true');
+            }
+          });
+        });
+        document.getElementById("pwa-btn-container").appendChild(installButton);
+      }
+    });
+
+    function generateRandomHexColor() {
+      const colors = ["#38bdf8", "#818cf8", "#fb7185", "#34d399", "#fbbf24"];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+    document.getElementById("colorPicker").value = generateRandomHexColor();
+  </script>
+</body>
+</html>
